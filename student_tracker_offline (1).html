@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>سجل متابعة الطلاب الإلكتروني – نسخة تعمل بدون إنترنت</title>
+<style>
+  :root{
+    --bg:#fff7ed; /* orange-50 */
+    --panel:#ffffff;
+    --ink:#1f2937;
+    --muted:#6b7280;
+    --primary:#f97316; /* orange-500 */
+    --primary-600:#ea580c;
+    --green:#10b981;
+    --emerald:#059669;
+    --yellow:#f59e0b;
+    --red:#ef4444;
+    --purple:#7c3aed;
+    --purple-100:#ede9fe;
+    --gray-100:#f3f4f6;
+    --gray-200:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Cairo",Arial; background:var(--bg); color:var(--ink)}
+  h1,h2,h3{margin:0 0 .5rem}
+  .container{max-width:1100px;margin:0 auto;padding:16px}
+  .card{background:var(--panel);border:1px solid var(--gray-200);border-radius:14px;padding:16px; box-shadow:0 8px 20px rgba(0,0,0,.06)}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .btn{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.secondary{background:#6366f1;color:#fff}
+  .btn.green{background:var(--green);color:#fff}
+  .btn.gray{background:#6b7280;color:#fff}
+  .btn.red{background:var(--red);color:#fff}
+  .btn.yellow{background:var(--yellow);color:#000}
+  .btn.small{padding:6px 10px;font-size:14px;border-radius:8px}
+  .input,select{padding:10px 12px;border:1px solid var(--gray-200);border-radius:10px;outline:0}
+  .input:focus,select:focus{border-color:var(--primary)}
+  .table{width:100%;border-collapse:collapse}
+  .table th,.table td{border:1px solid var(--gray-200);padding:10px;text-align:right}
+  .table thead th{background:#e0f2fe}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:999px;padding:6px 10px;color:#065f46}
+  .statGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .stat{background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:12px;text-align:center}
+  .progress{width:100%;height:10px;background:var(--gray-200);border-radius:999px;overflow:hidden}
+  .bar{height:100%;width:0;transition:width .35s ease;border-radius:999px}
+  .bar.purple{background:var(--purple)}
+  .bar.green{background:var(--emerald)}
+  .bar.yellow{background:var(--yellow)}
+  .bar.red{background:var(--red)}
+  .sectionTitle{font-weight:800;color:#1f2937;margin:16px 0 8px}
+  .muted{color:var(--muted);font-size:14px}
+  .center{text-align:center}
+  .hidden{display:none}
+  .pill{background:#fff7ed;border:1px dashed var(--primary);padding:8px 10px;border-radius:10px}
+  .footer{font-size:12px;color:#6b7280;text-align:center;margin:18px 0}
+  @media print{
+    .no-print{display:none !important}
+    body{background:#fff}
+    .card{border:2px solid #000; box-shadow:none; border-radius:0}
+    .print-table th,.print-table td{border:2px solid #000 !important}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="loginView" class="card">
+    <div class="center">
+      <div style="font-size:42px">🏫</div>
+      <h1>سجل متابعة الطلاب</h1>
+      <div class="muted">✨ فكرة المعلمة فاطمة هزازي ✨</div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="row">
+      <label style="min-width:120px">📱 رقم الجوال</label>
+      <input id="phone" class="input" placeholder="05xxxxxxxx" dir="ltr" style="flex:1" />
+    </div>
+    <div class="row" style="margin-top:8px">
+      <label style="min-width:120px">🔒 كلمة المرور</label>
+      <input id="password" class="input" type="password" placeholder="••••" style="flex:1" />
+    </div>
+    <div class="row" style="margin-top:12px;justify-content:space-between">
+      <button id="loginBtn" class="btn primary" style="flex:1">🔑 تسجيل الدخول</button>
+      <button id="registerBtn" class="btn secondary" style="flex:1">مستخدم جديد؟ إنشاء حساب</button>
+    </div>
+    <div class="muted center" style="margin-top:10px">🔒 البيانات تُحفظ محليًا على هذا الجهاز</div>
+  </div>
+
+  <div id="appView" class="hidden">
+    <div class="card row" style="justify-content:space-between">
+      <div class="row">
+        <div style="font-size:26px">👤</div>
+        <div>
+          <div style="font-weight:800" id="welcome"></div>
+          <div class="muted">💾 حفظ تلقائي محلي - على هذا الجهاز</div>
+        </div>
+      </div>
+      <button id="logoutBtn" class="btn red">🚪 تسجيل الخروج</button>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="card">
+      <div class="center">
+        <h2>سجل متابعة الطلاب الإلكتروني</h2>
+        <div class="pill">نظام لإدارة أنماط التعلم والحضور والمستوى الأكاديمي</div>
+      </div>
+
+      <div style="height:10px"></div>
+      <div class="row no-print">
+        <button id="btnImportJSON" class="btn secondary small">📥 استيراد البيانات (JSON)</button>
+        <input id="fileJSON" type="file" accept=".json" class="hidden"/>
+        <button id="btnSaveJSON" class="btn green small">💾 حفظ البيانات</button>
+        <button id="btnSaveTxt" class="btn small" style="background:#9333ea;color:#fff">📄 حفظ نصي</button>
+        <button id="btnPrint" class="btn primary small">🖨️ طباعة PDF</button>
+        <input id="search" class="input" placeholder="🔎 ابحث بالاسم..." style="margin-right:auto; min-width:230px"/>
+        <button id="allPresent" class="btn green small">✅ الكل حاضر</button>
+        <button id="allAbsent" class="btn red small">❌ الكل غائب</button>
+      </div>
+
+      <div style="height:8px"></div>
+      <div class="row">
+        <select id="grade" class="input">
+          <option value="">🎓 -- اختر الصف الدراسي --</option>
+        </select>
+        <input id="subject" class="input" placeholder="المادة (مثال: الرياضيات)"/>
+        <input id="teacher" class="input" placeholder="اسم المعلم/المعلمة (مثال: أ/ فاطمة هزازي)"/>
+      </div>
+      <div id="gradeBadge" class="center" style="margin-top:10px"></div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="card no-print">
+      <h3 class="sectionTitle">إضافة طالب جديد</h3>
+      <div class="row">
+        <input id="newName" class="input" placeholder="اسم الطالب"/>
+        <button id="addBtn" class="btn primary">➕ إضافة</button>
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+    <div class="card">
+      <div class="tableWrap">
+        <table class="table print-table" id="studentsTable" aria-label="Students Table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>اسم الطالب/ة</th>
+              <th>نمط المتعلم</th>
+              <th>الحضور</th>
+              <th>مستوى الطالب</th>
+              <th class="no-print center">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+    <div id="quickStats" class="statGrid"></div>
+
+    <div style="height:12px"></div>
+    <div class="card">
+      <h3 class="sectionTitle center">إحصاءات أنماط التعلّم</h3>
+      <div id="styleStats" class="statGrid"></div>
+    </div>
+
+    <div style="height:12px"></div>
+    <div class="card">
+      <h3 class="sectionTitle center">إحصاءات مستويات الطلاب</h3>
+      <div id="levelStats" class="statGrid"></div>
+    </div>
+
+    <div class="footer no-print">
+      برمجة: أ/ فاطمة هزازي – ملتقى معلمي ومعلمات الرياضيات • ملتقى التعليم التفاعلي
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const gradeOptions = ['الأول الابتدائي','الثاني الابتدائي','الثالث الابتدائي','الرابع الابتدائي','الخامس الابتدائي','السادس الابتدائي','الأول المتوسط','الثاني المتوسط','الثالث المتوسط','الأول الثانوي','الثاني الثانوي','الثالث الثانوي'];
+  const learningStyles = ['بصري','سمعي','حركي','قرائي/كتابي','تفاعلي','منطقي'];
+  const attendanceOptions = ['حاضر','غائب'];
+  const levelOptions = ['دون المتوسط','ضمن المتوسط','فوق المتوسط'];
+
+  const els = {
+    loginView: document.getElementById('loginView'),
+    appView: document.getElementById('appView'),
+    phone: document.getElementById('phone'),
+    password: document.getElementById('password'),
+    loginBtn: document.getElementById('loginBtn'),
+    registerBtn: document.getElementById('registerBtn'),
+    welcome: document.getElementById('welcome'),
+    logoutBtn: document.getElementById('logoutBtn'),
+    grade: document.getElementById('grade'),
+    subject: document.getElementById('subject'),
+    teacher: document.getElementById('teacher'),
+    gradeBadge: document.getElementById('gradeBadge'),
+    newName: document.getElementById('newName'),
+    addBtn: document.getElementById('addBtn'),
+    tbody: document.getElementById('tbody'),
+    quickStats: document.getElementById('quickStats'),
+    styleStats: document.getElementById('styleStats'),
+    levelStats: document.getElementById('levelStats'),
+    btnImportJSON: document.getElementById('btnImportJSON'),
+    fileJSON: document.getElementById('fileJSON'),
+    btnSaveJSON: document.getElementById('btnSaveJSON'),
+    btnSaveTxt: document.getElementById('btnSaveTxt'),
+    btnPrint: document.getElementById('btnPrint'),
+    search: document.getElementById('search'),
+    allPresent: document.getElementById('allPresent'),
+    allAbsent: document.getElementById('allAbsent'),
+  };
+
+  // Populate grade select
+  gradeOptions.forEach(g => {
+    const o = document.createElement('option');
+    o.value = g; o.textContent = g;
+    els.grade.appendChild(o);
+  });
+
+  // State
+  const state = {
+    currentUser: null,
+    classInfo: { className: '', subject: '', teacherName: '' },
+    students: [],
+    searchQuery: ''
+  };
+
+  function saveUserData(){
+    if(!state.currentUser) return;
+    const key = 'userData_'+state.currentUser.phone;
+    const data = { classInfo: state.classInfo, students: state.students };
+    try{ localStorage.setItem(key, JSON.stringify(data)); }catch(e){}
+  }
+
+  function loadUserData(phone){
+    const key = 'userData_'+phone;
+    try{
+      const raw = localStorage.getItem(key);
+      if(!raw) return;
+      const data = JSON.parse(raw);
+      state.classInfo = data.classInfo || state.classInfo;
+      state.students = Array.isArray(data.students) ? data.students : [];
+    }catch(e){}
+  }
+
+  function showApp(){
+    els.loginView.classList.add('hidden');
+    els.appView.classList.remove('hidden');
+    els.welcome.textContent = 'مرحباً، '+state.currentUser.phone;
+    // fill form with class info
+    els.grade.value = state.classInfo.className || '';
+    els.subject.value = state.classInfo.subject || '';
+    els.teacher.value = state.classInfo.teacherName || '';
+    render();
+  }
+
+  // Auth
+  function tryAutoLogin(){
+    const saved = localStorage.getItem('currentUser');
+    if(!saved) return false;
+    try{
+      state.currentUser = JSON.parse(saved);
+      loadUserData(state.currentUser.phone);
+      showApp(); return true;
+    }catch(e){ localStorage.removeItem('currentUser'); }
+    return false;
+  }
+
+  function login(){
+    const phone = els.phone.value.trim();
+    const password = els.password.value.trim();
+    if(phone.length < 10 || password.length < 4){ alert('أدخلي رقم جوال 10 خانات وكلمة مرور 4 خانات على الأقل'); return; }
+    const users = JSON.parse(localStorage.getItem('users')||'[]');
+    const u = users.find(x=>x.phone===phone && x.password===password);
+    if(!u){ alert('بيانات الدخول غير صحيحة. يمكنك إنشاء حساب جديد.'); return; }
+    state.currentUser = u;
+    localStorage.setItem('currentUser', JSON.stringify(u));
+    loadUserData(u.phone);
+    showApp();
+  }
+
+  function register(){
+    const phone = els.phone.value.trim();
+    const password = els.password.value.trim();
+    if(phone.length < 10 || password.length < 4){ alert('أدخلي رقم جوال 10 خانات وكلمة مرور 4 خانات على الأقل'); return; }
+    const users = JSON.parse(localStorage.getItem('users')||'[]');
+    if(users.find(x=>x.phone===phone)){ alert('هذا الرقم مسجّل مسبقًا. سجّلي الدخول.'); return; }
+    const u = { phone, password };
+    users.push(u);
+    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('currentUser', JSON.stringify(u));
+    state.currentUser = u;
+    loadUserData(u.phone);
+    alert('✅ تم التسجيل بنجاح!');
+    showApp();
+  }
+
+  function logout(){
+    saveUserData();
+    localStorage.removeItem('currentUser');
+    state.currentUser = null;
+    els.appView.classList.add('hidden');
+    els.loginView.classList.remove('hidden');
+  }
+
+  // Students ops
+  function addStudent(){
+    const name = els.newName.value.trim();
+    if(!name) return;
+    const s = {
+      id: Date.now()+Math.random(),
+      name,
+      learningStyle: learningStyles[0],
+      attendance: attendanceOptions[0],
+      level: levelOptions[1]
+    };
+    state.students.push(s);
+    els.newName.value = '';
+    saveUserData();
+    render();
+  }
+
+  function deleteStudent(id){
+    state.students = state.students.filter(s=>s.id!==id);
+    saveUserData();
+    render();
+  }
+
+  function updateField(id, field, value){
+    const s = state.students.find(s=>s.id===id);
+    if(!s) return;
+    s[field] = value;
+    saveUserData();
+    renderQuickStats(); // lightweight refresh
+  }
+
+  function setAllAttendance(v){
+    state.students.forEach(s=>s.attendance=v);
+    saveUserData();
+    render();
+  }
+
+  // Class info ops
+  els.grade.addEventListener('change', ()=>{ state.classInfo.className = els.grade.value; saveUserData(); render(); });
+  els.subject.addEventListener('input', ()=>{ state.classInfo.subject = els.subject.value; saveUserData(); });
+  els.teacher.addEventListener('input', ()=>{ state.classInfo.teacherName = els.teacher.value; saveUserData(); });
+
+  // Export/Import/Print
+  els.btnSaveJSON.addEventListener('click', ()=>{
+    const data = {
+      classInfo: state.classInfo,
+      students: state.students,
+      userPhone: state.currentUser?.phone,
+      timestamp: new Date().toLocaleString('ar-SA')
+    };
+    const blob = new Blob(['\ufeff'+JSON.stringify(data,null,2)], {type:'application/json;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `سجل_الطلاب_${(state.classInfo.className||'البيانات').replace(/\s+/g,'_')}_${new Date().toLocaleDateString('ar-SA').replace(/\//g,'-')}.json`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+  });
+
+  els.btnSaveTxt.addEventListener('click', ()=>{
+    const lines = [];
+    lines.push('سجل متابعة الطلاب الإلكتروني');
+    lines.push('فكرة المعلمة فاطمة هزازي');
+    lines.push('');
+    lines.push('معلومات الصف:');
+    lines.push('الصف: '+(state.classInfo.className||'غير محدد'));
+    lines.push('المادة: '+(state.classInfo.subject||'غير محددة'));
+    lines.push('المعلم/ة: '+(state.classInfo.teacherName||'غير محدد'));
+    lines.push('');
+    lines.push('قائمة الطلاب:');
+    state.students.forEach((s,i)=>{
+      lines.push(`${i+1}. ${s.name}`);
+      lines.push(`   - نمط المتعلم: ${s.learningStyle}`);
+      lines.push(`   - الحضور: ${s.attendance}`);
+      lines.push(`   - المستوى: ${s.level}`);
+    });
+    const blob = new Blob(['\ufeff'+lines.join('\n')],{type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `سجل_نصي_${(state.classInfo.className||'الطلاب').replace(/\s+/g,'_')}_${new Date().toLocaleDateString('ar-SA').replace(/\//g,'-')}.txt`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+  });
+
+  els.btnImportJSON.addEventListener('click', ()=> els.fileJSON.click());
+  els.fileJSON.addEventListener('change', (ev)=>{
+    const f = ev.target.files[0];
+    if(!f) return;
+    const fr = new FileReader();
+    fr.onload = (e)=>{
+      try{
+        const data = JSON.parse(e.target.result);
+        if(!data.students || !Array.isArray(data.students)) throw new Error('bad');
+        state.classInfo = data.classInfo || state.classInfo;
+        state.students = data.students;
+        // refill UI
+        els.grade.value = state.classInfo.className || '';
+        els.subject.value = state.classInfo.subject || '';
+        els.teacher.value = state.classInfo.teacherName || '';
+        saveUserData();
+        render();
+        alert('✅ تم الاستيراد بنجاح!');
+      }catch(err){
+        alert('❌ ملف غير صالح.');
+      }
+    };
+    fr.readAsText(f, 'UTF-8');
+    ev.target.value = '';
+  });
+
+  els.btnPrint.addEventListener('click', ()=>window.print());
+  els.search.addEventListener('input', ()=>{ state.searchQuery = els.search.value.trim().toLowerCase(); renderTable(); });
+
+  els.addBtn.addEventListener('click', addStudent);
+  els.allPresent.addEventListener('click', ()=>setAllAttendance('حاضر'));
+  els.allAbsent.addEventListener('click', ()=>setAllAttendance('غائب'));
+  els.loginBtn.addEventListener('click', login);
+  els.registerBtn.addEventListener('click', register);
+  els.logoutBtn.addEventListener('click', logout);
+
+  // Renderers
+  function render(){
+    // badge
+    els.gradeBadge.innerHTML = state.classInfo.className
+      ? `<div class="badge">✅ تم اختيار الصف: <strong>${state.classInfo.className}</strong></div>`
+      : '';
+    renderTable();
+    renderQuickStats();
+    renderStyleStats();
+    renderLevelStats();
+  }
+
+  function filtered(){
+    if(!state.searchQuery) return state.students;
+    return state.students.filter(s => (s.name||'').toLowerCase().includes(state.searchQuery));
+  }
+
+  function renderTable(){
+    const rows = filtered().map((s, i)=>{
+      // selects
+      const styleSel = `<select data-id="${s.id}" data-field="learningStyle">${learningStyles.map(v=>`<option ${v===s.learningStyle?'selected':''}>${v}</option>`).join('')}</select>`;
+      const attSel = `<select data-id="${s.id}" data-field="attendance">${attendanceOptions.map(v=>`<option ${v===s.attendance?'selected':''}>${v}</option>`).join('')}</select>`;
+      const lvlSel = `<select data-id="${s.id}" data-field="level">${levelOptions.map(v=>`<option ${v===s.level?'selected':''}>${v}</option>`).join('')}</select>`;
+      return `<tr>
+        <td>${i+1}</td>
+        <td><input class="input" data-id="${s.id}" data-field="name" value="${escapeHtml(s.name)}"/></td>
+        <td>${styleSel}</td>
+        <td>${attSel}</td>
+        <td>${lvlSel}</td>
+        <td class="no-print center"><button class="btn red small" data-del="${s.id}">🗑️ حذف</button></td>
+      </tr>`;
+    }).join('');
+    els.tbody.innerHTML = rows || `<tr><td colspan="6" class="center muted">لا توجد بيانات</td></tr>`;
+
+    // attach listeners
+    els.tbody.querySelectorAll('button[data-del]').forEach(b=>{
+      b.addEventListener('click', ()=> deleteStudent(Number(b.getAttribute('data-del'))));
+    });
+    els.tbody.querySelectorAll('input[data-field], select[data-field]').forEach(el=>{
+      el.addEventListener('change', ()=>{
+        const id = Number(el.getAttribute('data-id'));
+        const field = el.getAttribute('data-field');
+        updateField(id, field, el.value);
+      });
+    });
+  }
+
+  function renderQuickStats(){
+    const total = state.students.length;
+    const present = state.students.filter(s=>s.attendance==='حاضر').length;
+    const above = state.students.filter(s=>s.level==='فوق المتوسط').length;
+    els.quickStats.innerHTML = `
+      <div class="stat"><div>إجمالي الطلاب</div><div style="font-size:28px;font-weight:900;color:#f97316">${total}</div></div>
+      <div class="stat"><div>الحاضرون</div><div style="font-size:28px;font-weight:900;color:#10b981">${present}</div></div>
+      <div class="stat"><div>فوق المتوسط</div><div style="font-size:28px;font-weight:900;color:#f59e0b">${above}</div></div>
+    `;
+  }
+
+  function countBy(arr, key){
+    const m = {};
+    arr.forEach(s=>{ const v = s[key]; m[v] = (m[v]||0)+1; });
+    return m;
+  }
+  function pct(n, total){ total = total||1; return Math.round((n*100)/total); }
+  function statCard(title, count, percent, colorClass){
+    return `<div class="stat">
+      <div class="row" style="justify-content:space-between">
+        <div style="font-weight:800">${title}</div>
+        <div class="muted">${count} طالب/ة</div>
+      </div>
+      <div class="progress" style="margin-top:8px">
+        <div class="bar ${colorClass}" style="width:${percent}%"></div>
+      </div>
+      <div class="muted" style="text-align:left">${percent}%</div>
+    </div>`;
+  }
+
+  function renderStyleStats(){
+    const total = state.students.length || 1;
+    // focus on four main categories
+    const keys = ['سمعي','بصري','قرائي/كتابي','حركي'];
+    const counts = countBy(state.students,'learningStyle');
+    els.styleStats.innerHTML = keys.map(k=>{
+      const c = counts[k]||0;
+      const p = pct(c,total);
+      return statCard(k, c, p, 'purple');
+    }).join('');
+  }
+
+  function renderLevelStats(){
+    const total = state.students.length || 1;
+    const keys = ['فوق المتوسط','ضمن المتوسط','دون المتوسط']; // render in this order
+    const color = (k)=> k==='فوق المتوسط' ? 'green' : (k==='ضمن المتوسط' ? 'yellow' : 'red');
+    const counts = countBy(state.students,'level');
+    els.levelStats.innerHTML = keys.map(k=> statCard(k, counts[k]||0, pct((counts[k]||0), total), color(k))).join('');
+  }
+
+  function escapeHtml(str){ return (str||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+  // init
+  if(!tryAutoLogin()){ /* stay on login */ }
+})();
+</script>
+</body>
+</html>
